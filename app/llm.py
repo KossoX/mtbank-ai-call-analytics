@@ -1,12 +1,12 @@
 from collections.abc import Iterable
-from typing import Any
 
 from openai import OpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 from app.config import get_settings
 
 
-Message = dict[str, Any]
+Message = ChatCompletionMessageParam
 
 
 class LLMClient:
