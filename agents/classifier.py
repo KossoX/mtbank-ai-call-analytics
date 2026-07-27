@@ -1,18 +1,7 @@
 import json
-from collections.abc import Iterable
-from typing import Any, Protocol
+from typing import Any
 
-from openai.types.chat import ChatCompletionMessageParam
-
-from app.llm import LLMClient
-
-
-class LLMProvider(Protocol):
-    def complete(
-        self,
-        messages: Iterable[ChatCompletionMessageParam],
-    ) -> str:
-        ...
+from app.llm import LLMClient, LLMProvider
 
 
 ALLOWED_TOPICS = {"кредиты", "карты", "переводы", "жалобы"}

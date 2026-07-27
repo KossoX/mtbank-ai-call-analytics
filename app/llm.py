@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from typing import Protocol
 
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
@@ -7,6 +8,14 @@ from app.config import get_settings
 
 
 Message = ChatCompletionMessageParam
+
+
+class LLMProvider(Protocol):
+    def complete(
+        self,
+        messages: Iterable[ChatCompletionMessageParam],
+    ) -> str:
+        ...
 
 
 class LLMClient:
