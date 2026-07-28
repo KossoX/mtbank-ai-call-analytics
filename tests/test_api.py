@@ -3,6 +3,7 @@ from typing import Any
 from fastapi.testclient import TestClient
 
 from app.api import create_app
+from app.llm import LLMQuotaExceededError
 
 
 class FakePipeline:
@@ -26,9 +27,16 @@ class FakePipeline:
         }
 
 
+class QuotaExceededPipeline:
+    def analyze(self, audio_path: str) -> dict[str, Any]:
+        raise LLMQuotaExceededError("LLM request quota exceeded.")
+
+
 def test_health_endpoint() -> None:
     client = TestClient(
-        create_app(pipeline=FakePipeline())  # type: ignore[arg-type]
+        create_app(
+            pipeline=FakePipeline(),  # type: ignore[arg-type]
+        )
     )
 
     response = client.get("/health")
@@ -39,7 +47,9 @@ def test_health_endpoint() -> None:
 
 def test_analyze_endpoint_accepts_audio_file() -> None:
     client = TestClient(
-        create_app(pipeline=FakePipeline())  # type: ignore[arg-type]
+        create_app(
+            pipeline=FakePipeline(),  # type: ignore[arg-type]
+        )
     )
 
     response = client.post(
@@ -59,7 +69,9 @@ def test_analyze_endpoint_accepts_audio_file() -> None:
 
 def test_analyze_endpoint_rejects_empty_file() -> None:
     client = TestClient(
-        create_app(pipeline=FakePipeline())  # type: ignore[arg-type]
+        create_app(
+            pipeline=FakePipeline(),  # type: ignore[arg-type]
+        )
     )
 
     response = client.post(
@@ -76,4 +88,29 @@ def test_analyze_endpoint_rejects_empty_file() -> None:
     assert response.status_code == 400
     assert response.json()["detail"] == (
         "Uploaded audio file is empty."
+    )
+
+
+def test_analyze_endpoint_returns_429_when_llm_quota_is_exceeded() -> None:
+    client = TestClient(
+        create_app(
+            pipeline=QuotaExceededPipeline(),  # type: ignore[arg-type]
+        )
+    )
+
+    response = client.post(
+        "/analyze",
+        files={
+            "file": (
+                "sample.wav",
+                b"fake wav content",
+                "audio/wav",
+            )
+        },
+    )
+
+    assert response.status_code == 429
+    assert response.json()["detail"] == (
+        "LLM request quota exceeded. "
+        "Please retry later or configure another model."
     )

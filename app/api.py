@@ -4,6 +4,7 @@ from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
+from app.llm import LLMQuotaExceededError
 from app.pipeline import AudioAnalysisPipeline
 
 
@@ -50,6 +51,15 @@ def create_app(
 
             active_pipeline = pipeline or AudioAnalysisPipeline()
             return active_pipeline.analyze(temporary_path)
+
+        except LLMQuotaExceededError as error:
+            raise HTTPException(
+                status_code=429,
+                detail=(
+                    "LLM request quota exceeded. "
+                    "Please retry later or configure another model."
+                ),
+            ) from error
 
         except (ValueError, FileNotFoundError) as error:
             raise HTTPException(
