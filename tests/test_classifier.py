@@ -51,3 +51,16 @@ def test_classifier_rejects_empty_transcript() -> None:
 
     with pytest.raises(ValueError, match="must not be empty"):
         agent.analyze("")
+def test_classifier_returns_undefined_topic_when_reason_is_missing() -> None:
+    agent = ClassifierAgent(
+        llm=FakeLLM('{"topic": "не определено", "priority": "low"}')
+    )
+
+    result = agent.analyze(
+        "Оператор: Добрый день, МТБанк, меня зовут Анна. Чем могу помочь?"
+    )
+
+    assert result == {
+        "topic": "не определено",
+        "priority": "low",
+    } 
