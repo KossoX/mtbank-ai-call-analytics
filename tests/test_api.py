@@ -45,6 +45,19 @@ def test_health_endpoint() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_metrics_endpoint_exposes_prometheus_metrics() -> None:
+    client = TestClient(
+        create_app(
+            pipeline=FakePipeline(),  # type: ignore[arg-type]
+        )
+    )
+
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    assert "mtbank_calls_total" in response.text
+
+
 def test_analyze_endpoint_accepts_audio_file() -> None:
     client = TestClient(
         create_app(

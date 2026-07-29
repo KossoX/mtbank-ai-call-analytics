@@ -9,35 +9,87 @@ services:
       - .env
     environment:
       HF_HOME: /root/.cache/huggingface
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-http://localhost:3000}
+      REALTIME_WHISPER_MODEL: ${REALTIME_WHISPER_MODEL:-tiny}
+      REALTIME_CHUNK_SECONDS: ${REALTIME_CHUNK_SECONDS:-1.0}
     volumes:
       - whisper_cache:/root/.cache/huggingface
     restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - |
+          import urllib.request
+          urllib.request.urlopen("http://localhost:8000/health")
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
   pipelines:
-    image: ghcr.io/open-webui/pipelines:main
+    image: ghcr.io/open-webui/pipelines@sha256:b48e9bc338ce2be0acfbeff01810db72408a12f07739f9e3879c1f2b00952d6e
     environment:
-      PIPELINES_API_KEY: "0p3n-w3bu!"
+      PIPELINES_API_KEY: ${PIPELINES_API_KEY:-0p3n-w3bu!}
     ports:
-      - "9099:9099"
+      - "127.0.0.1:9099:9099"
     volumes:
       - pipelines_data:/app/pipelines
       - openwebui_data:/app/backend/data:ro
       - ./pipeline.py:/app/pipelines/mtbank_call_analytics.py:ro
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     restart: unless-stopped
 
   openwebui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/open-webui/open-webui@sha256:6a773e5c3a246b65cbe74ce942b294292c0e5f81c138f703d111bc162f7d7c3d
+    environment:
+      OPENAI_API_BASE_URLS: http://pipelines:9099
+      OPENAI_API_KEYS: ${PIPELINES_API_KEY:-0p3n-w3bu!}
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:-change-me-in-production}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-http://localhost:3000}
     ports:
       - "3000:8080"
     volumes:
       - openwebui_data:/app/backend/data
     depends_on:
-      - pipelines
+      pipelines:
+        condition: service_started
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me-in-production}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
     restart: unless-stopped
 
 volumes:
   whisper_cache:
   pipelines_data:
   openwebui_data:
+  prometheus_data:
+  grafana_data:
