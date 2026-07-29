@@ -55,9 +55,7 @@ class SummarizerAgent:
 
         for item in action_items:
             if not isinstance(item, str) or not item.strip():
-                raise ValueError(
-                    "Every action item must be a non-empty string."
-                )
+                raise ValueError("Every action item must be a non-empty string.")
 
             validated_action_items.append(item.strip())
 

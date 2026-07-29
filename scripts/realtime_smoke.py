@@ -52,9 +52,7 @@ async def run(audio_path: Path, url: str) -> None:
             await socket.send(chunk)
 
             if len(chunk) < frames_per_chunk * 2:
-                await socket.send(
-                    json.dumps({"type": "flush"})
-                )
+                await socket.send(json.dumps({"type": "flush"}))
 
             response = json.loads(await socket.recv())
             round_trip_ms = (time.perf_counter() - sent_at) * 1000
@@ -65,9 +63,7 @@ async def run(audio_path: Path, url: str) -> None:
                         "type": response.get("type"),
                         "processing_ms": response.get("processing_ms"),
                         "round_trip_ms": round(round_trip_ms, 2),
-                        "latency_target_met": response.get(
-                            "latency_target_met"
-                        ),
+                        "latency_target_met": response.get("latency_target_met"),
                         "text": response.get("text", ""),
                     },
                     ensure_ascii=False,

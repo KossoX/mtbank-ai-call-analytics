@@ -99,9 +99,7 @@ def test_analyze_endpoint_rejects_empty_file() -> None:
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"] == (
-        "Uploaded audio file is empty."
-    )
+    assert response.json()["detail"] == ("Uploaded audio file is empty.")
 
 
 def test_analyze_endpoint_returns_429_when_llm_quota_is_exceeded() -> None:
@@ -124,6 +122,5 @@ def test_analyze_endpoint_returns_429_when_llm_quota_is_exceeded() -> None:
 
     assert response.status_code == 429
     assert response.json()["detail"] == (
-        "LLM request quota exceeded. "
-        "Please retry later or configure another model."
+        "LLM request quota exceeded. Please retry later or configure another model."
     )

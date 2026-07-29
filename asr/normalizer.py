@@ -1,6 +1,5 @@
 import re
 
-
 BANK_NAME_PATTERNS = (
     r"\bmk\s*bank\b",
     r"\bmt\s*bank\b",

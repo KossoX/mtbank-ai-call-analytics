@@ -6,7 +6,6 @@ from openai.types.chat import ChatCompletionMessageParam
 
 from app.config import get_settings
 
-
 Message = ChatCompletionMessageParam
 
 
@@ -18,8 +17,7 @@ class LLMProvider(Protocol):
     def complete(
         self,
         messages: Iterable[ChatCompletionMessageParam],
-    ) -> str:
-        ...
+    ) -> str: ...
 
 
 class LLMClient:
@@ -42,9 +40,7 @@ class LLMClient:
                 temperature=0,
             )
         except RateLimitError as error:
-            raise LLMQuotaExceededError(
-                "LLM request quota exceeded."
-            ) from error
+            raise LLMQuotaExceededError("LLM request quota exceeded.") from error
 
         content = response.choices[0].message.content
 

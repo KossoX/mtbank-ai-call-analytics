@@ -3,7 +3,6 @@ from typing import Any
 
 from app.llm import LLMClient, LLMProvider
 
-
 CHECKLIST_FIELDS = (
     "greeting",
     "need_detection",
@@ -63,15 +62,11 @@ class QualityAgent:
             value = checklist.get(field)
 
             if not isinstance(value, bool):
-                raise ValueError(
-                    f"Quality checklist field must be boolean: {field}"
-                )
+                raise ValueError(f"Quality checklist field must be boolean: {field}")
 
             validated_checklist[field] = value
 
-        total = sum(
-            25 for value in validated_checklist.values() if value
-        )
+        total = sum(25 for value in validated_checklist.values() if value)
 
         return {
             "total": total,

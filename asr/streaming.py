@@ -1,14 +1,13 @@
+import wave
 from dataclasses import asdict, dataclass
 from io import BytesIO
 from threading import Lock
 from typing import Any
-import wave
 
 from faster_whisper import WhisperModel
 
 from app.config import get_settings
 from asr.normalizer import normalize_transcript_text
-
 
 SILENCE_RMS_THRESHOLD = 1500.0
 
@@ -29,9 +28,7 @@ class StreamingTranscriber:
 
     def __init__(self, model_name: str | None = None) -> None:
         settings = get_settings()
-        self._model_name = (
-            model_name or settings.realtime_whisper_model
-        )
+        self._model_name = model_name or settings.realtime_whisper_model
         self._model: WhisperModel | None = None
         self._model_lock = Lock()
         self._inference_lock = Lock()
@@ -71,9 +68,7 @@ class StreamingTranscriber:
             raise ValueError("PCM16 payload must contain complete samples.")
 
         if sample_rate not in {8000, 16000, 24000, 48000}:
-            raise ValueError(
-                "sample_rate must be 8000, 16000, 24000 or 48000."
-            )
+            raise ValueError("sample_rate must be 8000, 16000, 24000 or 48000.")
 
         if self._is_silence(pcm_bytes):
             return []
@@ -109,9 +104,7 @@ class StreamingTranscriber:
 
             segment_start = float(segment.start)
             segment_end = float(segment.end)
-            chunk_duration = len(pcm_bytes) / (
-                sample_rate * 2
-            )
+            chunk_duration = len(pcm_bytes) / (sample_rate * 2)
 
             if segment_end <= segment_start:
                 segment_end = chunk_duration
@@ -134,8 +127,7 @@ class StreamingTranscriber:
         if not samples:
             return True
 
-        mean_square = sum(
-            int(sample) * int(sample)
-            for sample in samples
-        ) / len(samples)
-        return mean_square ** 0.5 < SILENCE_RMS_THRESHOLD
+        mean_square = sum(int(sample) * int(sample) for sample in samples) / len(
+            samples
+        )
+        return mean_square**0.5 < SILENCE_RMS_THRESHOLD

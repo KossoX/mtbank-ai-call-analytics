@@ -18,9 +18,7 @@ class FakeLLM:
 
 
 def test_classifier_returns_valid_result() -> None:
-    agent = ClassifierAgent(
-        llm=FakeLLM('{"topic": "кредиты", "priority": "medium"}')
-    )
+    agent = ClassifierAgent(llm=FakeLLM('{"topic": "кредиты", "priority": "medium"}'))
 
     result = agent.analyze("Клиент спрашивает условия кредита.")
 
@@ -38,9 +36,7 @@ def test_classifier_rejects_invalid_json() -> None:
 
 
 def test_classifier_rejects_unknown_topic() -> None:
-    agent = ClassifierAgent(
-        llm=FakeLLM('{"topic": "страхование", "priority": "low"}')
-    )
+    agent = ClassifierAgent(llm=FakeLLM('{"topic": "страхование", "priority": "low"}'))
 
     with pytest.raises(ValueError, match="Unsupported topic"):
         agent.analyze("Клиент спрашивает про страхование.")
@@ -51,6 +47,8 @@ def test_classifier_rejects_empty_transcript() -> None:
 
     with pytest.raises(ValueError, match="must not be empty"):
         agent.analyze("")
+
+
 def test_classifier_returns_undefined_topic_when_reason_is_missing() -> None:
     agent = ClassifierAgent(
         llm=FakeLLM('{"topic": "не определено", "priority": "low"}')
@@ -63,4 +61,4 @@ def test_classifier_returns_undefined_topic_when_reason_is_missing() -> None:
     assert result == {
         "topic": "не определено",
         "priority": "low",
-    } 
+    }

@@ -47,13 +47,11 @@ def test_pipeline_builds_transcript_and_analysis() -> None:
     result = pipeline.analyze("test.wav")
 
     assert result["transcript"] == (
-        "Оператор: Добрый день.\n"
-        "Клиент: Хочу узнать условия кредита."
+        "Оператор: Добрый день.\nКлиент: Хочу узнать условия кредита."
     )
     assert result["analysis"] == {
         "received_transcript": (
-            "Оператор: Добрый день.\n"
-            "Клиент: Хочу узнать условия кредита."
+            "Оператор: Добрый день.\nКлиент: Хочу узнать условия кредита."
         )
     }
 

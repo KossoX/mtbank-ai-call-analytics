@@ -71,9 +71,7 @@ def test_summarizer_rejects_invalid_json() -> None:
 
 def test_summarizer_rejects_non_list_action_items() -> None:
     agent = SummarizerAgent(
-        llm=FakeLLM(
-            '{"summary": "Тестовое резюме.", "action_items": "нет"}'
-        )
+        llm=FakeLLM('{"summary": "Тестовое резюме.", "action_items": "нет"}')
     )
 
     with pytest.raises(ValueError, match="action_items list"):
@@ -81,9 +79,7 @@ def test_summarizer_rejects_non_list_action_items() -> None:
 
 
 def test_summarizer_rejects_empty_transcript() -> None:
-    agent = SummarizerAgent(
-        llm=FakeLLM('{"summary": "Текст.", "action_items": []}')
-    )
+    agent = SummarizerAgent(llm=FakeLLM('{"summary": "Текст.", "action_items": []}'))
 
     with pytest.raises(ValueError, match="must not be empty"):
         agent.analyze("")

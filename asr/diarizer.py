@@ -1,7 +1,6 @@
 import re
 from typing import Any
 
-
 SPEAKERS = ("Оператор", "Клиент")
 
 OPERATOR_HINTS = (
@@ -61,10 +60,7 @@ class Diarizer:
         if any(hint in normalized for hint in OPERATOR_HINTS):
             return "Оператор"
 
-        if any(
-            re.search(pattern, normalized)
-            for pattern in CLIENT_HINTS
-        ):
+        if any(re.search(pattern, normalized) for pattern in CLIENT_HINTS):
             return "Клиент"
 
         return fallback
@@ -89,9 +85,7 @@ class Diarizer:
             enriched_segment = dict(segment)
             text = str(enriched_segment.get("text", ""))
 
-            if result and self._is_continuation(
-                str(result[-1].get("text", ""))
-            ):
+            if result and self._is_continuation(str(result[-1].get("text", ""))):
                 guessed_speaker = str(result[-1]["speaker"])
             else:
                 guessed_speaker = self._guess_speaker(
@@ -103,10 +97,6 @@ class Diarizer:
             result.append(enriched_segment)
 
             if not self._is_continuation(text):
-                fallback = (
-                    "Клиент"
-                    if guessed_speaker == "Оператор"
-                    else "Оператор"
-                )
+                fallback = "Клиент" if guessed_speaker == "Оператор" else "Оператор"
 
         return result

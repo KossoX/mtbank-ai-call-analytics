@@ -16,9 +16,7 @@ class TrendsAgent:
         calls: list[dict[str, Any]],
     ) -> dict[str, Any]:
         if len(calls) < 2:
-            raise ValueError(
-                "Trend analysis requires at least two calls."
-            )
+            raise ValueError("Trend analysis requires at least two calls.")
 
         statistics = self._calculate_statistics(calls)
         compact_calls = [
@@ -151,11 +149,7 @@ class TrendsAgent:
             if passed is False:
                 compliance_failures += 1
 
-        average_quality = (
-            round(sum(scores) / len(scores), 2)
-            if scores
-            else 0.0
-        )
+        average_quality = round(sum(scores) / len(scores), 2) if scores else 0.0
 
         return {
             "total_calls": len(calls),
@@ -178,9 +172,7 @@ class TrendsAgent:
         field: str,
     ) -> list[str]:
         if not isinstance(value, list) or not 1 <= len(value) <= 5:
-            raise ValueError(
-                f"Trends response {field} must contain 1-5 items."
-            )
+            raise ValueError(f"Trends response {field} must contain 1-5 items.")
 
         result: list[str] = []
 
@@ -204,13 +196,9 @@ class TrendsAgent:
         try:
             result = json.loads(cleaned)
         except json.JSONDecodeError as error:
-            raise ValueError(
-                "Trends agent returned invalid JSON."
-            ) from error
+            raise ValueError("Trends agent returned invalid JSON.") from error
 
         if not isinstance(result, dict):
-            raise ValueError(
-                "Trends response must be a JSON object."
-            )
+            raise ValueError("Trends response must be a JSON object.")
 
         return result

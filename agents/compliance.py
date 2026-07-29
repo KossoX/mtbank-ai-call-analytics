@@ -54,9 +54,7 @@ class ComplianceAgent:
 
         for issue in issues:
             if not isinstance(issue, str) or not issue.strip():
-                raise ValueError(
-                    "Every compliance issue must be a non-empty string."
-                )
+                raise ValueError("Every compliance issue must be a non-empty string.")
 
             validated_issues.append(issue.strip())
 

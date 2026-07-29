@@ -1,6 +1,5 @@
 from prometheus_client import Counter, Gauge, Histogram
 
-
 CALLS_TOTAL = Counter(
     "mtbank_calls_total",
     "Number of completed call analyses.",
@@ -56,19 +55,13 @@ def record_call_analysis(
     quality_score = analysis.get("quality_score", {})
     compliance = analysis.get("compliance", {})
 
-    classification = (
-        classification if isinstance(classification, dict) else {}
-    )
-    quality_score = (
-        quality_score if isinstance(quality_score, dict) else {}
-    )
+    classification = classification if isinstance(classification, dict) else {}
+    quality_score = quality_score if isinstance(quality_score, dict) else {}
     compliance = compliance if isinstance(compliance, dict) else {}
 
     topic = str(classification.get("topic", "не определено"))
     priority = str(classification.get("priority", "unknown"))
-    compliance_passed = str(
-        bool(compliance.get("passed", False))
-    ).lower()
+    compliance_passed = str(bool(compliance.get("passed", False))).lower()
 
     try:
         score = float(quality_score.get("total", 0))

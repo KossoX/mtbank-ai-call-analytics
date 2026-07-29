@@ -1,13 +1,13 @@
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter
-from typing import Any, Callable
+from typing import Any
 
 from agents.classifier import ClassifierAgent
 from agents.compliance import ComplianceAgent
 from agents.quality import QualityAgent
 from agents.summarizer import SummarizerAgent
 from app.json_logging import log_agent_event
-
 
 AgentCallable = Callable[[str], Any]
 

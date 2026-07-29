@@ -3,7 +3,6 @@ from typing import Any
 
 from app.llm import LLMClient, LLMProvider
 
-
 ALLOWED_TOPICS = {
     "кредиты",
     "карты",

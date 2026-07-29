@@ -16,7 +16,6 @@ from typing import Any
 import httpx
 from pydantic import BaseModel, Field
 
-
 UUID_PATTERN = re.compile(
     r"[0-9a-fA-F]{8}-"
     r"[0-9a-fA-F]{4}-"
@@ -78,10 +77,7 @@ class Pipeline:
             return f"### Не удалось начать анализ\n\n{error}"
 
         filename = audio_path.name
-        content_type = (
-            mimetypes.guess_type(filename)[0]
-            or "application/octet-stream"
-        )
+        content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
 
         try:
             with audio_path.open("rb") as audio_file:
@@ -104,8 +100,7 @@ class Pipeline:
             )
         except httpx.RequestError as error:
             return (
-                "### Сервис анализа недоступен\n\n"
-                f"Не удалось обратиться к API: {error}"
+                f"### Сервис анализа недоступен\n\nНе удалось обратиться к API: {error}"
             )
 
         try:
@@ -118,10 +113,7 @@ class Pipeline:
             )
 
         if not isinstance(payload, dict):
-            return (
-                "### Некорректный ответ API\n\n"
-                "Ожидался JSON-объект."
-            )
+            return "### Некорректный ответ API\n\nОжидался JSON-объект."
 
         if not response.is_success:
             detail = payload.get(
@@ -141,14 +133,10 @@ class Pipeline:
         self,
         body: dict[str, Any],
     ) -> Path:
-        upload_directory = Path(
-            self.valves.UPLOAD_DIRECTORY
-        ).resolve()
+        upload_directory = Path(self.valves.UPLOAD_DIRECTORY).resolve()
 
         if not upload_directory.is_dir():
-            raise ValueError(
-                "Каталог загруженных файлов Open WebUI недоступен."
-            )
+            raise ValueError("Каталог загруженных файлов Open WebUI недоступен.")
 
         candidates: list[Path] = []
 
@@ -161,18 +149,12 @@ class Pipeline:
                 candidates.append(Path(explicit_path))
 
             if file_id:
-                candidates.extend(
-                    upload_directory.glob(f"{file_id}_*")
-                )
+                candidates.extend(upload_directory.glob(f"{file_id}_*"))
 
             if filename:
                 safe_filename = Path(filename).name
-                candidates.append(
-                    upload_directory / safe_filename
-                )
-                candidates.extend(
-                    upload_directory.glob(f"*_{safe_filename}")
-                )
+                candidates.append(upload_directory / safe_filename)
+                candidates.extend(upload_directory.glob(f"*_{safe_filename}"))
 
         audio_candidates = self._prepare_audio_candidates(
             candidates,
@@ -196,10 +178,7 @@ class Pipeline:
             reference: dict[str, str] = {}
 
             file_id = value.get("id")
-            filename = (
-                value.get("filename")
-                or value.get("name")
-            )
+            filename = value.get("filename") or value.get("name")
             explicit_path = value.get("path")
 
             if isinstance(file_id, str) and file_id:
@@ -215,9 +194,7 @@ class Pipeline:
                 yield reference
 
             for nested_value in value.values():
-                yield from Pipeline._extract_file_references(
-                    nested_value
-                )
+                yield from Pipeline._extract_file_references(nested_value)
 
             return
 
@@ -255,9 +232,7 @@ class Pipeline:
             if not resolved_candidate.is_file():
                 continue
 
-            unique_candidates[str(resolved_candidate)] = (
-                resolved_candidate
-            )
+            unique_candidates[str(resolved_candidate)] = resolved_candidate
 
         return sorted(
             unique_candidates.values(),
@@ -275,49 +250,27 @@ class Pipeline:
         transcript = str(payload.get("transcript", "")).strip()
 
         segments_value = payload.get("segments", [])
-        segments = (
-            segments_value
-            if isinstance(segments_value, list)
-            else []
-        )
+        segments = segments_value if isinstance(segments_value, list) else []
 
         analysis_value = payload.get("analysis", {})
-        analysis = (
-            analysis_value
-            if isinstance(analysis_value, dict)
-            else {}
-        )
+        analysis = analysis_value if isinstance(analysis_value, dict) else {}
 
         classification_value = analysis.get(
             "classification",
             {},
         )
         classification = (
-            classification_value
-            if isinstance(classification_value, dict)
-            else {}
+            classification_value if isinstance(classification_value, dict) else {}
         )
 
         quality_value = analysis.get("quality_score", {})
-        quality = (
-            quality_value
-            if isinstance(quality_value, dict)
-            else {}
-        )
+        quality = quality_value if isinstance(quality_value, dict) else {}
 
         checklist_value = quality.get("checklist", {})
-        checklist = (
-            checklist_value
-            if isinstance(checklist_value, dict)
-            else {}
-        )
+        checklist = checklist_value if isinstance(checklist_value, dict) else {}
 
         compliance_value = analysis.get("compliance", {})
-        compliance = (
-            compliance_value
-            if isinstance(compliance_value, dict)
-            else {}
-        )
+        compliance = compliance_value if isinstance(compliance_value, dict) else {}
 
         topic = classification.get("topic", "не определено")
         priority = classification.get(
@@ -326,14 +279,8 @@ class Pipeline:
         )
         total = quality.get("total", 0)
 
-        compliance_passed = bool(
-            compliance.get("passed", False)
-        )
-        compliance_status = (
-            "Пройдена"
-            if compliance_passed
-            else "Обнаружены нарушения"
-        )
+        compliance_passed = bool(compliance.get("passed", False))
+        compliance_status = "Пройдена" if compliance_passed else "Обнаружены нарушения"
 
         lines = [
             "# Анализ звонка МТБанка",
@@ -416,22 +363,14 @@ class Pipeline:
                 if not isinstance(segment, dict):
                     continue
 
-                start = Pipeline._format_timestamp(
-                    segment.get("start", 0)
-                )
-                end = Pipeline._format_timestamp(
-                    segment.get("end", 0)
-                )
+                start = Pipeline._format_timestamp(segment.get("start", 0))
+                end = Pipeline._format_timestamp(segment.get("end", 0))
                 speaker = Pipeline._escape_table_text(
                     segment.get("speaker", "Неизвестно")
                 )
-                text = Pipeline._escape_table_text(
-                    segment.get("text", "")
-                )
+                text = Pipeline._escape_table_text(segment.get("text", ""))
 
-                lines.append(
-                    f"| {start}–{end} | {speaker} | {text} |"
-                )
+                lines.append(f"| {start}–{end} | {speaker} | {text} |")
         else:
             lines.append("| — | — | Сегменты отсутствуют |")
 
@@ -474,9 +413,4 @@ class Pipeline:
 
     @staticmethod
     def _escape_table_text(value: Any) -> str:
-        return (
-            str(value)
-            .replace("|", "\\|")
-            .replace("\n", " ")
-            .strip()
-        )
+        return str(value).replace("|", "\\|").replace("\n", " ").strip()

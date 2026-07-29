@@ -1,9 +1,8 @@
+import os
 from dataclasses import dataclass
 from pathlib import Path
-import os
 
 from dotenv import load_dotenv
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(PROJECT_ROOT / ".env")
@@ -28,14 +27,10 @@ def get_settings() -> Settings:
             "Create a local .env file in the project root."
         )
 
-    realtime_chunk_seconds = float(
-        os.getenv("REALTIME_CHUNK_SECONDS", "1.0")
-    )
+    realtime_chunk_seconds = float(os.getenv("REALTIME_CHUNK_SECONDS", "1.0"))
 
     if not 0.5 <= realtime_chunk_seconds <= 10.0:
-        raise RuntimeError(
-            "REALTIME_CHUNK_SECONDS must be between 0.5 and 10."
-        )
+        raise RuntimeError("REALTIME_CHUNK_SECONDS must be between 0.5 and 10.")
 
     return Settings(
         gemini_api_key=gemini_api_key,

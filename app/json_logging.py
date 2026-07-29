@@ -3,7 +3,6 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-
 LOGGER_NAME = "mtbank.agent"
 
 

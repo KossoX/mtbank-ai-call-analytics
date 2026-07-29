@@ -67,22 +67,14 @@ def test_trends_returns_statistics_and_llm_patterns() -> None:
 
 
 def test_trends_requires_two_calls() -> None:
-    agent = TrendsAgent(
-        llm=FakeLLM(
-            '{"patterns": ["p"], "recommendations": ["r"]}'
-        )
-    )
+    agent = TrendsAgent(llm=FakeLLM('{"patterns": ["p"], "recommendations": ["r"]}'))
 
     with pytest.raises(ValueError, match="at least two"):
         agent.analyze([_call("карты", 75, True)])
 
 
 def test_trends_rejects_invalid_llm_list() -> None:
-    agent = TrendsAgent(
-        llm=FakeLLM(
-            '{"patterns": [], "recommendations": ["r"]}'
-        )
-    )
+    agent = TrendsAgent(llm=FakeLLM('{"patterns": [], "recommendations": ["r"]}'))
 
     with pytest.raises(ValueError, match="patterns"):
         agent.analyze(

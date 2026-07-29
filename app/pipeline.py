@@ -26,16 +26,10 @@ class AudioAnalysisPipeline:
             segments = self._transcriber.transcribe(audio_path)
 
             if not segments:
-                raise ValueError(
-                    "Audio transcription returned no segments."
-                )
+                raise ValueError("Audio transcription returned no segments.")
 
-            diarized_segments = self._diarizer.assign_speakers(
-                segments
-            )
-            transcript = self._build_transcript(
-                diarized_segments
-            )
+            diarized_segments = self._diarizer.assign_speakers(segments)
+            transcript = self._build_transcript(diarized_segments)
             analysis = self._orchestrator.analyze(transcript)
 
             record_call_analysis(
@@ -49,9 +43,7 @@ class AudioAnalysisPipeline:
                 "analysis": analysis,
             }
         except Exception as error:
-            CALL_ERRORS_TOTAL.labels(
-                error_type=type(error).__name__
-            ).inc()
+            CALL_ERRORS_TOTAL.labels(error_type=type(error).__name__).inc()
             raise
 
     @staticmethod

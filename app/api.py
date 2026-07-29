@@ -36,23 +36,20 @@ from app.metrics import (
 from app.pipeline import AudioAnalysisPipeline
 from asr.streaming import StreamingTranscriber
 
-
 MAX_AUDIO_BYTES = 50 * 1024 * 1024
 MAX_BATCH_FILES = 10
 MIN_BATCH_FILES = 2
 
 
 class AnalysisPipelineProtocol(Protocol):
-    def analyze(self, audio_path: str | Path) -> dict[str, Any]:
-        ...
+    def analyze(self, audio_path: str | Path) -> dict[str, Any]: ...
 
 
 class TrendsAgentProtocol(Protocol):
     def analyze(
         self,
         calls: list[dict[str, Any]],
-    ) -> dict[str, Any]:
-        ...
+    ) -> dict[str, Any]: ...
 
 
 class StreamingTranscriberProtocol(Protocol):
@@ -62,8 +59,7 @@ class StreamingTranscriberProtocol(Protocol):
         *,
         sample_rate: int,
         language: str = "ru",
-    ) -> list[dict[str, Any]]:
-        ...
+    ) -> list[dict[str, Any]]: ...
 
 
 class AnalyzeUrlRequest(BaseModel):
@@ -242,15 +238,11 @@ def create_app(
                     "error_type": type(error).__name__,
                     "message": str(error),
                 },
-                duration_ms=(
-                    perf_counter() - trend_started_at
-                ) * 1000,
+                duration_ms=(perf_counter() - trend_started_at) * 1000,
             )
             raise HTTPException(
                 status_code=429,
-                detail=(
-                    "LLM request quota exceeded during trend analysis."
-                ),
+                detail=("LLM request quota exceeded during trend analysis."),
             ) from error
         except ValueError as error:
             log_agent_event(
@@ -260,9 +252,7 @@ def create_app(
                     "error_type": type(error).__name__,
                     "message": str(error),
                 },
-                duration_ms=(
-                    perf_counter() - trend_started_at
-                ) * 1000,
+                duration_ms=(perf_counter() - trend_started_at) * 1000,
             )
             raise HTTPException(
                 status_code=400,
@@ -273,9 +263,7 @@ def create_app(
             agent="trends",
             event="agent.output",
             payload=trends,
-            duration_ms=(
-                perf_counter() - trend_started_at
-            ) * 1000,
+            duration_ms=(perf_counter() - trend_started_at) * 1000,
         )
         TREND_BATCHES_TOTAL.inc()
 
@@ -304,16 +292,12 @@ def create_app(
         except HTTPError as error:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    f"Could not download audio URL: HTTP {error.code}."
-                ),
+                detail=(f"Could not download audio URL: HTTP {error.code}."),
             ) from error
         except (URLError, TimeoutError) as error:
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    "Could not download audio from the provided URL."
-                ),
+                detail=("Could not download audio from the provided URL."),
             ) from error
 
         suffix_name = Path(parsed_url.path).name or "download.wav"
@@ -364,10 +348,7 @@ def create_app(
             if not pcm_bytes:
                 return
 
-            audio_seconds = (
-                len(pcm_bytes)
-                / (sample_rate * bytes_per_sample)
-            )
+            audio_seconds = len(pcm_bytes) / (sample_rate * bytes_per_sample)
             started_at = perf_counter()
 
             try:
@@ -389,22 +370,18 @@ def create_app(
 
             processing_seconds = perf_counter() - started_at
             REALTIME_CHUNKS_TOTAL.labels(status="success").inc()
-            REALTIME_CHUNK_PROCESSING_SECONDS.observe(
-                processing_seconds
-            )
+            REALTIME_CHUNK_PROCESSING_SECONDS.observe(processing_seconds)
 
             adjusted_segments: list[dict[str, Any]] = []
 
             for segment in segments:
                 adjusted = dict(segment)
                 adjusted["start"] = round(
-                    float(adjusted.get("start", 0))
-                    + audio_offset,
+                    float(adjusted.get("start", 0)) + audio_offset,
                     3,
                 )
                 adjusted["end"] = round(
-                    float(adjusted.get("end", 0))
-                    + audio_offset,
+                    float(adjusted.get("end", 0)) + audio_offset,
                     3,
                 )
                 adjusted_segments.append(adjusted)
@@ -419,13 +396,10 @@ def create_app(
                         processing_seconds * 1000,
                         2,
                     ),
-                    "latency_target_met": (
-                        processing_seconds < 3.0
-                    ),
+                    "latency_target_met": (processing_seconds < 3.0),
                     "segments": adjusted_segments,
                     "text": " ".join(
-                        str(segment.get("text", ""))
-                        for segment in adjusted_segments
+                        str(segment.get("text", "")) for segment in adjusted_segments
                     ).strip(),
                 }
             )
@@ -470,17 +444,13 @@ def create_app(
                             await websocket.send_json(
                                 {
                                     "type": "error",
-                                    "detail": (
-                                        "Unsupported sample_rate."
-                                    ),
+                                    "detail": ("Unsupported sample_rate."),
                                 }
                             )
                             continue
 
                         sample_rate = int(requested_sample_rate)
-                        language = str(
-                            command.get("language", "ru")
-                        )
+                        language = str(command.get("language", "ru"))
                         await websocket.send_json(
                             {
                                 "type": "started",
@@ -529,11 +499,7 @@ def create_app(
 
                 if binary_message is not None:
                     buffer.extend(binary_message)
-                    chunk_size = int(
-                        sample_rate
-                        * bytes_per_sample
-                        * chunk_seconds
-                    )
+                    chunk_size = int(sample_rate * bytes_per_sample * chunk_seconds)
 
                     while len(buffer) >= chunk_size:
                         current = bytes(buffer[:chunk_size])
