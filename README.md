@@ -218,15 +218,19 @@ done
 
 WER по эталонным расшифровкам на локальном прогоне:
 
+```bash
+python scripts/evaluate_wer.py
+```
+
 | Файл | WER |
 |---|---:|
-| `call_01_credit.wav` | `0.2342` |
-| `call_02_card.wav` | `0.2133` |
-| `call_03_transfer.wav` | `0.2786` |
-| `call_04_complaint.wav` | `0.2057` |
-| `call_05_security_8khz.wav` | `0.1818` |
+| `call_01_credit.wav` | `0.0270` |
+| `call_02_card.wav` | `0.0600` |
+| `call_03_transfer.wav` | `0.0714` |
+| `call_04_complaint.wav` | `0.0000` |
+| `call_05_security_8khz.wav` | `0.0063` |
 
-Средний WER по набору: `0.2227`.
+Средний WER по набору: `0.0330`.
 
 ## Тесты
 
@@ -239,7 +243,7 @@ pytest -q
 Текущее состояние:
 
 ```text
-44 passed
+46 passed
 ```
 
 Покрыты:
@@ -285,7 +289,7 @@ Grafana dashboard provisioned из `monitoring/grafana/dashboards/mtbank-call-an
 | Pipeline архитектура | 25 | OpenWebUI Pipeline, supervisor orchestration, автоматическое подключение при чистом Compose-запуске |
 | ASR | 20 | `faster-whisper medium`, 5 аудио, WER-таблица, timestamps, normalizer и базовая диаризация |
 | Multi-Agent | 25 | classifier, quality, compliance и summarizer с параллельным запуском и строгой JSON-валидацией |
-| Код и архитектура | 15 | FastAPI, 44 теста, `.env`, JSON-логи, error handling, healthcheck и Prometheus |
+| Код и архитектура | 15 | FastAPI, 46 тестов, `.env`, JSON-логи, error handling, healthcheck и Prometheus |
 | Документация | 10 | архитектура, быстрый старт, API-примеры, решения и ограничения |
 | Живое демо | 5 | весь локальный стек поднимается Compose; для сдачи требуется внешний HTTPS |
 | Real-time | +5 | WebSocket PCM16, pre-warm, 1-секундные chunks, измеряемая latency; benchmark `250.77 ms` max |
